@@ -1,6 +1,6 @@
 {
   "name": "centrifuge",
-  "version": "5.4.0",
+  "version": "1.0.0",
   "description": "JavaScript client SDK for bidirectional communication with Centrifugo and Centrifuge-based server from browser, NodeJS and React Native",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -65,7 +65,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/centrifugal/centrifuge-js.git"
+    "url": "https://github.com/chainstream-io/centrifuge-js.git"
   },
   "keywords": [
     "websocket",
@@ -81,9 +81,9 @@
   "author": "Alexander Emelin",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/centrifugal/centrifuge-js/issues"
+    "url": "https://github.com/chainstream-io/centrifuge-js/issues"
   },
-  "homepage": "https://github.com/centrifugal/centrifuge-js",
+  "homepage": "https://github.com/chainstream-io/centrifuge-js",
   "dependencies": {
     "events": "^3.3.0",
     "protobufjs": "^7.2.5"

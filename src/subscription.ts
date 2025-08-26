@@ -34,6 +34,7 @@ export class Subscription extends (EventEmitter as new () => TypedEventEmitter<S
   private _recoverable: boolean;
   private _positioned: boolean;
   private _joinLeave: boolean;
+  private _filter: string;
   // @ts-ignore – this is used by a client in centrifuge.ts.
   private _inflight: boolean;
   private _prevValue: any;
@@ -55,6 +56,7 @@ export class Subscription extends (EventEmitter as new () => TypedEventEmitter<S
     this._recoverable = false;
     this._positioned = false;
     this._joinLeave = false;
+    this._filter = '';
     this._minResubscribeDelay = 500;
     this._maxResubscribeDelay = 20000;
     this._resubscribeTimeout = null;
@@ -451,6 +453,7 @@ export class Subscription extends (EventEmitter as new () => TypedEventEmitter<S
     }
 
     if (this._delta) req.delta = this._delta;
+    if (this._filter) req.filter = this._filter;
 
     return { subscribe: req };
   }
@@ -642,6 +645,9 @@ export class Subscription extends (EventEmitter as new () => TypedEventEmitter<S
         throw new Error('unsupported delta format');
       }
       this._delta = options.delta;
+    }
+    if (options.filter) {
+      this._filter = options.filter;
     }
   }
 
