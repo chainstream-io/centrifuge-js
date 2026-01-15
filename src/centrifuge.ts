@@ -29,7 +29,6 @@ import EventEmitter from 'events';
 
 const defaults: Options = {
   headers: {},
-  httpHeaders: {},
   token: '',
   getToken: null,
   data: null,
@@ -259,13 +258,6 @@ export class Centrifuge extends (EventEmitter as new () => TypedEventEmitter<Cli
   /** setHeaders allows setting connection emulated headers. */
   setHeaders(headers: { [key: string]: string }) {
     this._config.headers = headers;
-  }
-
-  /** setHttpHeaders allows setting HTTP headers for WebSocket handshake.
-   * Only works in Node.js environment with 'ws' library.
-   * Browser WebSocket API does not support custom headers. */
-  setHttpHeaders(headers: { [key: string]: string }) {
-    this._config.httpHeaders = headers;
   }
 
   /** send asynchronous data to a server (without any response from a server 
@@ -678,8 +670,7 @@ export class Centrifuge extends (EventEmitter as new () => TypedEventEmitter<Cli
       } else {
         this._debug('client will use websocket');
         this._transport = new WebsocketTransport(this._endpoint as string, {
-          websocket: websocket,
-          httpHeaders: this._config.httpHeaders
+          websocket: websocket
         });
         if (!this._transport.supported()) {
           throw new Error('WebSocket constructor not found, make sure it is available globally or passed as a dependency in Centrifuge options');
@@ -702,8 +693,7 @@ export class Centrifuge extends (EventEmitter as new () => TypedEventEmitter<Cli
         if (transportName === 'websocket') {
           this._debug('trying websocket transport');
           this._transport = new WebsocketTransport(transportEndpoint, {
-            websocket: websocket,
-            httpHeaders: this._config.httpHeaders
+            websocket: websocket
           });
           if (!this._transport.supported()) {
             this._debug('websocket transport not available');

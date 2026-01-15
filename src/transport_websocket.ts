@@ -31,26 +31,10 @@ export class WebsocketTransport {
     if (protocol === 'protobuf') {
       subProtocol = 'centrifuge-protobuf';
     }
-
-    // Check if we have HTTP headers to pass (only works in Node.js with 'ws' library)
-    // Browser WebSocket API does not support custom headers
-    const httpHeaders = this.options.httpHeaders;
-    const hasHttpHeaders = httpHeaders && Object.keys(httpHeaders).length > 0;
-
     if (subProtocol !== '') {
-      if (hasHttpHeaders) {
-        // Node.js 'ws' library supports third argument with headers
-        this._transport = new this.options.websocket(this.endpoint, subProtocol, { headers: httpHeaders });
-      } else {
-        this._transport = new this.options.websocket(this.endpoint, subProtocol);
-      }
+      this._transport = new this.options.websocket(this.endpoint, subProtocol);
     } else {
-      if (hasHttpHeaders) {
-        // Node.js 'ws' library supports third argument with headers
-        this._transport = new this.options.websocket(this.endpoint, undefined, { headers: httpHeaders });
-      } else {
-        this._transport = new this.options.websocket(this.endpoint);
-      }
+      this._transport = new this.options.websocket(this.endpoint);
     }
     if (protocol === 'protobuf') {
       this._transport.binaryType = 'arraybuffer';
