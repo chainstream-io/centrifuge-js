@@ -35,10 +35,12 @@ export class WebsocketTransport {
     }
 
     // Add token via Sec-WebSocket-Protocol header for authentication
-    // Format: "Bearer {token}" - server extracts token from this sub-protocol
+    // Note: Sec-WebSocket-Protocol values cannot contain spaces
+    // So we use format "Bearer.{token}" or just the token directly
     const wsProtocolToken = this.options.wsProtocolToken;
     if (wsProtocolToken) {
-      protocols.push(`Bearer ${wsProtocolToken}`);
+      // Use token directly without "Bearer " prefix since spaces are not allowed
+      protocols.push(wsProtocolToken);
     }
 
     // Determine the protocols argument
