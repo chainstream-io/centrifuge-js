@@ -10,7 +10,7 @@ import { Centrifuge } from '../build/index.js';
 // Replace with your actual token
 const TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImtleXN0b3JlLUNIQU5HRS1NRSJ9.eyJqdGkiOiJsOU1KdDU5ZzZSTnlRWlp5UExiSlgiLCJzdWIiOiJIR2hWbmpiSWlheDFIcDNUakdUd083WU9FUkJURXRwaSIsImlhdCI6MTc2ODU3NTAyNywiZXhwIjoxNzY4NjYxNDI3LCJjbGllbnRfaWQiOiJIR2hWbmpiSWlheDFIcDNUakdUd083WU9FUkJURXRwaSIsImlzcyI6Imh0dHBzOi8vZGV4LmFzaWEuYXV0aC5jaGFpbnN0cmVhbS5pby8iLCJhdWQiOiJodHRwczovL2FwaS5kZXguY2hhaW5zdHJlYW0uaW8ifQ.OKB7bHi5ZV2yYiNGTBwMV21MY4wOV8bqaveN_k6KkzuDefox9F_2PHixdt9EIyUiAjTDw16g3jhDOvf_7Ku4djnzNS5nq1zSQJP1Pg4q7le5L16fGj-ZamVmvnOjQ6X3CQHHWDz07ohrB4YHtM3ZPcAse-xflt0c7G6ULYau2di07QdvxOVEhvoJSj928nJgd4UwdvLIi3DyuGjKiFxacaXLJfUs-n_8vPj_QUZZX58q5XW8ZhiifTd_YVKwZRCImcIttz8BbuT0qP-UxDgKTbUZm1IHoJBFfaVXauu-w-NgEBlny_dnbrEWa7tyXeTWRVI6vSAR9zlFNUaih_A1tg";
 
-const WS_URL_TEST = 'wss://realtime-dex-test.chainstream.io/connection/websocket';
+const WS_URL_TEST = 'wss://realtime-dex.chainstream.io/connection/websocket';
 // const WS_URL_PROD = 'wss://realtime-dex.chainstream.io/connection/websocket';
 
 // async function testDirectWsWithHeaders(url: string, label: string) {
@@ -64,38 +64,63 @@ async function testCentrifugeWithHttpHeaders(url: string, label: string) {
       },
     });
 
-    // Set HTTP headers before connecting
-    client.setHttpHeaders({
-      'Authorization': `Bearer ${TOKEN}`,
-    });
-
-    console.log('[test] httpHeaders set, calling connect()...');
-
-    const timeout = setTimeout(() => {
-      console.log('❌ Timeout - no connection');
-      client.disconnect();
-      resolve();
-    }, 10000);
-
     client.on('connecting', (ctx) => {
       console.log('[connecting]', ctx);
     });
 
     client.on('connected', (ctx) => {
       console.log('✅ [connected]', ctx);
-      clearTimeout(timeout);
-      client.disconnect();
-      resolve();
+      
+      // 连接成功后创建订阅
+      const channel = "dex-candle:sol_EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v_1s";
+      // const filter = "balance > 20";  // 可选：添加 filter
+      
+      console.log(`\n📝 Subscribing to channel: ${channel}`);
+      // console.log(`🔍 With filter: ${filter}`);
+      
+      const sub = client.newSubscription(channel, {
+        // filter: filter  // 取消注释以启用 filter
+      });
+      
+      sub.on('subscribing', (ctx) => {
+        console.log('[sub:subscribing]', ctx);
+      });
+      
+      sub.on('subscribed', (ctx) => {
+        console.log('✅ [sub:subscribed]', ctx);
+        console.log('\n📡 Waiting for messages...\n');
+      });
+      
+      sub.on('error', (ctx) => {
+        console.error('❌ [sub:error]', ctx);
+      });
+      
+      sub.on('publication', (ctx) => {
+        console.log('📊 [publication]', new Date().toISOString());
+        console.log(JSON.stringify(ctx, null, 2));
+        console.log('');
+      });
+      
+      sub.on('unsubscribed', (ctx) => {
+        console.log('[sub:unsubscribed]', ctx);
+      });
+      
+      sub.subscribe();
     });
 
     client.on('disconnected', (ctx) => {
       console.log('[disconnected]', ctx);
+      resolve();
     });
 
     client.on('error', (ctx) => {
       console.error('❌ [error]', ctx);
-      clearTimeout(timeout);
-      resolve();
+    });
+
+    // 处理 Ctrl+C 退出
+    process.on('SIGINT', () => {
+      console.log('\n\n🛑 Received SIGINT, disconnecting...');
+      client.disconnect();
     });
 
     client.connect();

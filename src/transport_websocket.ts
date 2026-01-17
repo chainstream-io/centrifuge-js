@@ -27,25 +27,15 @@ export class WebsocketTransport {
   }
 
   initialize(protocol: string, callbacks: any) {
-    // Build protocols array for Sec-WebSocket-Protocol header
-    const protocols: string[] = [];
-    
+    let subProtocol = '';
     if (protocol === 'protobuf') {
-      protocols.push('centrifuge-protobuf');
+      subProtocol = 'centrifuge-protobuf';
     }
-
-    // Add token via Sec-WebSocket-Protocol header for authentication
-    // Note: Sec-WebSocket-Protocol values cannot contain spaces
-    // So we use format "Bearer.{token}" or just the token directly
-    const wsProtocolToken = this.options.wsProtocolToken;
-    if (wsProtocolToken) {
-      // Use token directly without "Bearer " prefix since spaces are not allowed
-      protocols.push(wsProtocolToken);
+    if (subProtocol !== '') {
+      this._transport = new this.options.websocket(this.endpoint, subProtocol);
+    } else {
+      this._transport = new this.options.websocket(this.endpoint);
     }
-
-    // Determine the protocols argument
-    const protocolsArg = protocols.length > 0 ? protocols : undefined;
-    this._transport = new this.options.websocket(this.endpoint, protocolsArg);
     
     if (protocol === 'protobuf') {
       this._transport.binaryType = 'arraybuffer';

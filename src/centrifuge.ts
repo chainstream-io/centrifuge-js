@@ -48,7 +48,6 @@ const defaults: Options = {
   timeout: 5000,
   maxServerPingDelay: 10000,
   networkEventTarget: null,
-  wsProtocolToken: '',
 }
 
 interface serverSubscription {
@@ -261,11 +260,6 @@ export class Centrifuge extends (EventEmitter as new () => TypedEventEmitter<Cli
     this._config.headers = headers;
   }
 
-  /** setWsProtocolToken allows setting token to pass via Sec-WebSocket-Protocol header.
-   * Works in both browser and Node.js environments. */
-  setWsProtocolToken(token: string) {
-    this._config.wsProtocolToken = token;
-  }
 
   /** send asynchronous data to a server (without any response from a server 
    * expected, see rpc method if you need response). */
@@ -677,8 +671,7 @@ export class Centrifuge extends (EventEmitter as new () => TypedEventEmitter<Cli
       } else {
         this._debug('client will use websocket');
         this._transport = new WebsocketTransport(this._endpoint as string, {
-          websocket: websocket,
-          wsProtocolToken: this._config.wsProtocolToken
+          websocket: websocket
         });
         if (!this._transport.supported()) {
           throw new Error('WebSocket constructor not found, make sure it is available globally or passed as a dependency in Centrifuge options');
@@ -701,8 +694,7 @@ export class Centrifuge extends (EventEmitter as new () => TypedEventEmitter<Cli
         if (transportName === 'websocket') {
           this._debug('trying websocket transport');
           this._transport = new WebsocketTransport(transportEndpoint, {
-            websocket: websocket,
-            wsProtocolToken: this._config.wsProtocolToken
+            websocket: websocket
           });
           if (!this._transport.supported()) {
             this._debug('websocket transport not available');
