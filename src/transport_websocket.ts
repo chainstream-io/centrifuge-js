@@ -27,31 +27,24 @@ export class WebsocketTransport {
   }
 
   initialize(protocol: string, callbacks: any) {
-    let subProtocol = '';
+    // Build protocols array for Sec-WebSocket-Protocol header
+    const protocols: string[] = [];
+    
     if (protocol === 'protobuf') {
-      subProtocol = 'centrifuge-protobuf';
+      protocols.push('centrifuge-protobuf');
     }
 
-    // Check if we have HTTP headers to pass (only works in Node.js with 'ws' library)
-    // Browser WebSocket API does not support custom headers
-    const httpHeaders = this.options.httpHeaders;
-    const hasHttpHeaders = httpHeaders && Object.keys(httpHeaders).length > 0;
-
-    if (subProtocol !== '') {
-      if (hasHttpHeaders) {
-        // Node.js 'ws' library supports third argument with headers
-        this._transport = new this.options.websocket(this.endpoint, subProtocol, { headers: httpHeaders });
-      } else {
-        this._transport = new this.options.websocket(this.endpoint, subProtocol);
-      }
-    } else {
-      if (hasHttpHeaders) {
-        // Node.js 'ws' library supports third argument with headers
-        this._transport = new this.options.websocket(this.endpoint, undefined, { headers: httpHeaders });
-      } else {
-        this._transport = new this.options.websocket(this.endpoint);
-      }
+    // Add token via Sec-WebSocket-Protocol header for authentication
+    // Format: "Bearer {token}" - server extracts token from this sub-protocol
+    const wsProtocolToken = this.options.wsProtocolToken;
+    if (wsProtocolToken) {
+      protocols.push(`Bearer ${wsProtocolToken}`);
     }
+
+    // Determine the protocols argument
+    const protocolsArg = protocols.length > 0 ? protocols : undefined;
+    this._transport = new this.options.websocket(this.endpoint, protocolsArg);
+    
     if (protocol === 'protobuf') {
       this._transport.binaryType = 'arraybuffer';
     }

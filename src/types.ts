@@ -96,10 +96,10 @@ export interface Options {
   // these headers are then used like real HTTP headers sent from the client.
   // Requires Centrifugo v6.
   headers: {[key: string]: string};
-  // HTTP headers to send with WebSocket handshake request.
-  // Only works in Node.js environment with 'ws' library.
-  // Browser WebSocket API does not support custom headers.
-  httpHeaders: {[key: string]: string};
+  // Token to pass via Sec-WebSocket-Protocol header for authentication.
+  // Works in both browser and Node.js environments.
+  // Format: ["access_token", "<token>"] will be sent as Sec-WebSocket-Protocol.
+  wsProtocolToken: string;
   /** allows enabling debug mode */
   debug: boolean;
   /** allows setting initial connection token (JWT) */

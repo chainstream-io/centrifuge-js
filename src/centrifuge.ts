@@ -29,7 +29,6 @@ import EventEmitter from 'events';
 
 const defaults: Options = {
   headers: {},
-  httpHeaders: {},
   token: '',
   getToken: null,
   data: null,
@@ -49,6 +48,7 @@ const defaults: Options = {
   timeout: 5000,
   maxServerPingDelay: 10000,
   networkEventTarget: null,
+  wsProtocolToken: '',
 }
 
 interface serverSubscription {
@@ -261,18 +261,10 @@ export class Centrifuge extends (EventEmitter as new () => TypedEventEmitter<Cli
     this._config.headers = headers;
   }
 
-  /** setHttpHeaders allows setting HTTP headers for WebSocket handshake.
-   * Only works in Node.js environment with 'ws' library.
-   * Browser WebSocket API does not support custom headers. */
-  setHttpHeaders(headers: { [key: string]: string }) {
-    this._config.httpHeaders = headers;
-  }
-
-  /** setWebsocket allows setting WebSocket implementation at runtime.
-   * Useful for lazy-loading 'ws' library in Node.js environment.
-   * Must be called before connect(). */
-  setWebsocket(websocket: any) {
-    this._config.websocket = websocket;
+  /** setWsProtocolToken allows setting token to pass via Sec-WebSocket-Protocol header.
+   * Works in both browser and Node.js environments. */
+  setWsProtocolToken(token: string) {
+    this._config.wsProtocolToken = token;
   }
 
   /** send asynchronous data to a server (without any response from a server 
@@ -686,7 +678,7 @@ export class Centrifuge extends (EventEmitter as new () => TypedEventEmitter<Cli
         this._debug('client will use websocket');
         this._transport = new WebsocketTransport(this._endpoint as string, {
           websocket: websocket,
-          httpHeaders: this._config.httpHeaders
+          wsProtocolToken: this._config.wsProtocolToken
         });
         if (!this._transport.supported()) {
           throw new Error('WebSocket constructor not found, make sure it is available globally or passed as a dependency in Centrifuge options');
@@ -710,7 +702,7 @@ export class Centrifuge extends (EventEmitter as new () => TypedEventEmitter<Cli
           this._debug('trying websocket transport');
           this._transport = new WebsocketTransport(transportEndpoint, {
             websocket: websocket,
-            httpHeaders: this._config.httpHeaders
+            wsProtocolToken: this._config.wsProtocolToken
           });
           if (!this._transport.supported()) {
             this._debug('websocket transport not available');
