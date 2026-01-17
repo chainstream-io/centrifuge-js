@@ -268,6 +268,13 @@ export class Centrifuge extends (EventEmitter as new () => TypedEventEmitter<Cli
     this._config.httpHeaders = headers;
   }
 
+  /** setWebsocket allows setting WebSocket implementation at runtime.
+   * Useful for lazy-loading 'ws' library in Node.js environment.
+   * Must be called before connect(). */
+  setWebsocket(websocket: any) {
+    this._config.websocket = websocket;
+  }
+
   /** send asynchronous data to a server (without any response from a server 
    * expected, see rpc method if you need response). */
   async send(data: any): Promise<void> {
